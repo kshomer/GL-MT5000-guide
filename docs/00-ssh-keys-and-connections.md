@@ -144,7 +144,7 @@ ssh -i ~/.ssh/id_ed25519_<имя> root@<SERVER_IP> "echo ключ работае
 настроить, нужно открыть файл `~/.ssh/config` (создать, если его ещё нет) и добавить
 в него блоки вида:
 
-```sh
+```ini
 Host *
     UseKeychain yes
     AddKeysToAgent yes
@@ -180,7 +180,7 @@ chmod 600 ~/.ssh/config
 
 Полезные дополнительные параметры:
 
-```
+```ini
     Port 2222                              нестандартный порт
     LocalForward 8080 localhost:8080       туннель к порту сервера при подключении
     ServerAliveInterval 60                 держать соединение живым
