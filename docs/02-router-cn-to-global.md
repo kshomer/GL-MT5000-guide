@@ -146,7 +146,7 @@ dd if=factory_full.img bs=1 skip=$((0x4088)) count=2 2>/dev/null
 
 ## Шаг 5. Скрипт снятия лока
 
-Скрипт уже включён в этот репозиторий: `scripts/third_party/glinet-remove-chinalock.sh`.
+Скрипт уже включён в этот репозиторий: `scripts/third_party/01-glinet-remove-chinalock.sh`.
 
 Это зафиксированная, проверенная версия (2024.05.19.02) с одним отличием от
 оригинала: отключено автообновление скрипта из интернета (в оригинале скрипт при
@@ -162,7 +162,7 @@ dd if=factory_full.img bs=1 skip=$((0x4088)) count=2 2>/dev/null
 Скопировать скрипт на роутер (команда на компьютере):
 
 ```sh
-scp -O scripts/third_party/glinet-remove-chinalock.sh root@192.168.8.1:/tmp/
+scp -O scripts/third_party/01-glinet-remove-chinalock.sh root@192.168.8.1:/tmp/
 ```
 
 Перед запуском рекомендуется прочитать сам скрипт — он не длинный и полностью
@@ -171,7 +171,7 @@ scp -O scripts/third_party/glinet-remove-chinalock.sh root@192.168.8.1:/tmp/
 Посмотреть справку:
 
 ```sh
-sh /tmp/glinet-remove-chinalock.sh --help
+sh /tmp/01-glinet-remove-chinalock.sh --help
 ```
 
 ---
@@ -179,7 +179,7 @@ sh /tmp/glinet-remove-chinalock.sh --help
 ## Шаг 6. Запуск
 
 ```sh
-sh /tmp/glinet-remove-chinalock.sh --new-country-code=US
+sh /tmp/01-glinet-remove-chinalock.sh --new-country-code=US
 ```
 
 Подтвердить `y` на предупреждении.
@@ -301,7 +301,7 @@ recovery (зажать reset при включении → зайти на `192.
 | Размер раздела      | 4 MiB (4194304 байт)                                                                                        |
 | Маркеры валидности  | `firsttest`, `secondtest`                                                                                   |
 | Рантайм-значение    | `cat /proc/gl-hw-info/country_code`                                                                         |
-| Скрипт              | `scripts/third_party/glinet-remove-chinalock.sh` в этом репозитории (автор: Admon, github.com/Admonstrator) |
+| Скрипт              | `scripts/third_party/01-glinet-remove-chinalock.sh` в этом репозитории (автор: Admon, github.com/Admonstrator) |
 
 ### Если blkid не находит раздел (на будущее / другие прошивки)
 
