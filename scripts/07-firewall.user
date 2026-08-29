@@ -1,0 +1,19 @@
+#!/bin/sh
+# /etc/firewall.user — исполняется fw3 при каждом старте и перезагрузке файрвола
+# (include-секция firewall.xray_reapply с option reload '1' в /etc/config/firewall).
+#
+# Зачем: fw3 при любой пересборке правил (ifup/ifdown WAN, изменения в веб-панели,
+# reload любым сервисом) стирает таблицу mangle целиком — вместе с tproxy-правилами.
+# Без этого хука туннель после каждой такой пересборки молча умирал до ручного рестарта
+# (наблюдалось: четыре reload подряд снесли XRAY-цепочку).
+#
+# Логика: если Xray запущен — переприменить правила (tproxy-apply.sh идемпотентен).
+# Если не запущен (например, во время загрузки: fw3 стартует раньше S95) — не трогать:
+# правила применит init.d-сервис xray-tproxy после старта Xray.
+
+if ps w | grep '[x]ray' | grep -q client.json; then
+    /bin/sh /opt/xray/tproxy-apply.sh >/dev/null 2>&1
+    logger -t xray-fw "перезагрузка файрвола: tproxy-правила переприменены"
+else
+    logger -t xray-fw "перезагрузка файрвола: Xray не запущен, правила применит init.d"
+fi
