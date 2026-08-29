@@ -1,0 +1,40 @@
+#!/bin/sh /etc/rc.common
+# init.d сервис для Xray + tproxy на GL-MT5000
+# Запускает Xray, ждёт готовности, применяет tproxy-правила.
+
+START=95
+STOP=10
+USE_PROCD=1
+
+XRAY_BIN="/opt/xray/bin/xray"
+XRAY_CONFIG="/opt/xray/config/client.json"
+XRAY_ASSET="/opt/xray/share"
+APPLY_SCRIPT="/opt/xray/tproxy-apply.sh"
+FLUSH_SCRIPT="/opt/xray/tproxy-flush.sh"
+
+start_service() {
+    procd_open_instance
+    procd_set_param command "$XRAY_BIN" run -config "$XRAY_CONFIG"
+    procd_set_param env XRAY_LOCATION_ASSET="$XRAY_ASSET"
+    # лимит открытых файлов: разумный предел. 4096 мало (обрывы при нагрузке),
+    # 65535 опасно (позволяет сожрать всю память -> OOM). 16384 — баланс.
+    procd_set_param limits nofile="16384 16384"
+    procd_set_param respawn 3600 5 5
+    procd_set_param stdout 1
+    procd_set_param stderr 1
+    procd_close_instance
+
+    # применяем tproxy-правила после старта Xray (в фоне, с задержкой на готовность)
+    ( sleep 8; sh "$APPLY_SCRIPT" ) &
+}
+
+stop_service() {
+    # снимаем tproxy-правила при остановке
+    [ -x "$FLUSH_SCRIPT" ] && sh "$FLUSH_SCRIPT"
+}
+
+reload_service() {
+    stop
+    sleep 1
+    start
+}
