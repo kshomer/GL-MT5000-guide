@@ -40,22 +40,27 @@ xray-route list                 # показать все исключения
 ## Примеры
 
 Открыть заблокированный РФ-сайт через туннель:
+
 ```sh
-xray-route add-proxy tv539.ru
+xray-route add-proxy example.ru
 ```
 
 Пустить заграничный сайт напрямую:
+
 ```sh
 xray-route add-direct example.com
 ```
 
-Сайт переехал (539 в 540) — удалить старый, добавить новый:
+Сайт сменил домен (частая история для заблокированных сервисов) — удалить старый,
+добавить новый:
+
 ```sh
-xray-route del tv539.ru
-xray-route add-proxy tv540.ru
+xray-route del example.ru
+xray-route add-proxy example2.ru
 ```
 
 Посмотреть, что сейчас в исключениях:
+
 ```sh
 xray-route list
 ```
@@ -65,6 +70,7 @@ xray-route list
 ## Как это работает (безопасность)
 
 Каждая команда изменения:
+
 1. делает бэкап конфига;
 2. правит `client.json` через `jq` (JSON редактируется как структура — не ломается);
 3. валидирует результат через `xray -test`;
@@ -96,9 +102,11 @@ xray-route list
 ## Если что-то пошло не так
 
 Скрипт сам откатывается при ошибке, но если нужно вручную вернуть последний бэкап:
+
 ```sh
 cp /tmp/xray-route-backup.json /opt/xray/config/client.json
 /etc/init.d/xray-tproxy restart
 ```
+
 (бэкап `/tmp/...` живёт до перезагрузки; постоянный рабочий бэкап —
-`/opt/xray/backup/client.json.working-faza3`)
+`/opt/xray/backup/client.json.working`)
