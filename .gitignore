@@ -2,11 +2,15 @@
 .DS_Store
 
 # Реальные секреты — никогда не коммитить (используйте *.example версии)
-client.json
+client.json*
+AdGuardHome.config*
+id_ed25519*
+id_rsa*
 *.key
 *.pem
 *_private*
 *secret*
+*.rsc
 
 # Бэкапы устройств (полные конфиги, ключи) — только локально на Mac
 *.tar.gz
