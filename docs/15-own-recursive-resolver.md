@@ -85,6 +85,7 @@ docker network inspect <DOCKER_NET> --format '{{range .IPAM.Config}}{{.Gateway}}
 
 ```yaml
 server:
+    ip-freebind: yes
     interface: 127.0.0.1
     interface: <GW>
 
@@ -105,9 +106,36 @@ unbound-checkconf && systemctl restart unbound
 ss -tulnp | grep unbound
 ```
 
+⚠️ **`ip-freebind: yes` обязателен**, если резолвер слушает адрес docker-моста.
+
+При загрузке сервера unbound стартует раньше, чем Docker создаёт мост, и привязка
+к ещё не существующему адресу проваливается с ошибкой `can't bind socket: Cannot
+assign requested address`. Systemd делает 5 попыток и прекращает — сервис остаётся
+в состоянии failed до ручного вмешательства.
+
+Симптом со стороны клиента обманчив: часть сайтов продолжает открываться из кэша,
+а новые имена не резолвятся.
+
+`ip-freebind: yes` разрешает занять адрес заранее — сокет создаётся сразу, а работать
+начинает, когда адрес появляется.
+
+⚠️ **Не добавлять `After=docker.service`** через systemd drop-in
+(`/etc/systemd/system/unbound.service.d/`) — это выглядит логичным решением той же
+проблемы, но создаёт циклическую зависимость: unbound относится к `nss-lookup.target`,
+от которого зависит сам `docker.service`. Systemd обнаруживает цикл и разрывает его
+произвольным образом, выбрасывая одну из связей:
+
+```
+docker.service: Found ordering cycle on nss-lookup.target/start
+Job nss-lookup.target/start deleted to break ordering cycle
+```
+
+Система при этом работает, но поведение при следующем обновлении systemd
+непредсказуемо. `ip-freebind` решает задачу сам, без зависимостей.
+
 ⚠️ **Не добавлять `access-control: 0.0.0.0/0 refuse`** — эта строка перекрывает разрешения
 ниже и приводит к отказу `REFUSED` даже для разрешённых подсетей. Без неё unbound по
-умолчанию отказывает всем, кого не разрешили явно — защита сохраняется.
+умолчанию отказывает всем, кого не разрешили явно, — защита сохраняется.
 
 `qname-minimisation` отправляет каждому серверу в цепочке минимум информации: корневым —
 только зону верхнего уровня, а не полное имя. Прямо в тему приватности.
